@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation Template for creating VPC, EC2, ELB, CloudFront, and Route 53
+
+Parameters:
+  HostedZoneName:
+    Type: String
+    Default: "cloud.makedara.work"
+  SSLDomainName:
+    Type: String
+    Default: "cloud.makedara.work"
+
+Resources:
+  # Route 53 Hosted Zone
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Ref HostedZoneName
+
+  # SSL Certificate
+  SSLCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref SSLDomainName
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref SSLDomainName
+          HostedZoneId: !Ref HostedZone
+
+Outputs:
+  Result:
+    Description: 'Result'
+    Value: 'Complete!'
