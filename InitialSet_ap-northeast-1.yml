@@ -163,7 +163,7 @@ Resources:
       KeyName: !Ref KeyPairName
       ImageId: !Ref EC2ImageId
       NetworkInterfaces:
-        - AssociatePublicIpAddress: true
+        - AssociatePublicIpAddress: false
           DeviceIndex: '0'
           SubnetId: !Ref PublicSubnet1
           GroupSet:
