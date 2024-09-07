@@ -114,6 +114,21 @@ Resources:
       IpProtocol: -1
       SourceSecurityGroupId: !Ref DefaultSecurityGroup
 
+  # Security Group for EC2 Instance Connect Endpoint
+  EicSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-eic-security-group
+
   # Security Group for EC2
   InstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -148,6 +163,14 @@ Resources:
         - Key: Name
           Value: !Sub ${AWS::StackName}-elb-security-group
 
+  # EC2 Instance Connect Endpoint
+  EicEndpoint:
+    Type: "AWS::EC2::InstanceConnectEndpoint"
+    Properties: 
+      SubnetId: !Ref PublicSubnet1
+      SecurityGroupIds: 
+        - !Ref EicSecurityGroup
+ 
   # EC2 KeyPair
   KeyPair:
     Type: 'AWS::EC2::KeyPair'
