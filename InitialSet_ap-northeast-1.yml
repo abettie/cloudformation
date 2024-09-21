@@ -33,6 +33,12 @@ Resources:
         - Key: Name
           Value: !Sub ${AWS::StackName}-vpc
 
+  IPv6CidrBlock:
+    Type: AWS::EC2::VPCCidrBlock
+    Properties:
+      AmazonProvidedIpv6CidrBlock: true
+      VpcId: !Ref VPC
+
   # Internet Gateway
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -49,20 +55,26 @@ Resources:
 
   PublicSubnet1:
     Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: ap-northeast-1a
       CidrBlock: 10.0.1.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: !Select [ 0, !Cidr [ !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks], 2, 64 ]]
       Tags:
       - Key: Name
         Value: !Sub ${AWS::StackName}-public-1a-subnet
 
   PublicSubnet2:
     Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: ap-northeast-1c
       CidrBlock: 10.0.2.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: !Select [ 1, !Cidr [ !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks], 2, 64 ]]
       Tags:
       - Key: Name
         Value: !Sub ${AWS::StackName}-public-1c-subnet
@@ -81,6 +93,13 @@ Resources:
     Properties:
       RouteTableId: !Ref RouteTable
       DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicRouteIPv6:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref RouteTable
+      DestinationIpv6CidrBlock: ::/0
       GatewayId: !Ref InternetGateway
 
   SubnetRouteTableAssociation1:
@@ -234,6 +253,7 @@ Resources:
         - !Ref DefaultSecurityGroup
         - !Ref ELBSecurityGroup
       Type: application
+      IpAddressType: dualstack-without-public-ipv4
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-elb
