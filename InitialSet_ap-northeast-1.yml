@@ -178,6 +178,10 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIpv6: ::/0
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-elb-security-group
@@ -319,10 +323,10 @@ Resources:
     Properties:
       HostedZoneName: !Ref HostedZoneName
       Name: !Ref SSLDomainName
-      Type: A
+      Type: AAAA
       AliasTarget:
-        DNSName: !GetAtt CloudFrontDistribution.DomainName
-        HostedZoneId: Z2FDTNDATAQYW2
+        DNSName: !GetAtt LoadBalancer.DNSName
+        HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
 
 Outputs:
   VPCId:
@@ -337,3 +341,4 @@ Outputs:
   CloudFrontDistributionId:
     Description: 'CloudFront Distribution ID'
     Value: !Ref CloudFrontDistribution
+
